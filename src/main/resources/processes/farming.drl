@@ -1,0 +1,11 @@
+package com.sung.demo.farming
+
+import com.sung.demo.farming.Seed
+
+rule "SeedingRule"
+	when
+		$seed: Seed(seedingSeason == Seed.Season.SPRING)
+	then
+		$seed.setOkayToSeeding(true);
+		System.out.println("It's spring season, let's work");
+end	
