@@ -6,9 +6,9 @@
     <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="seed"></sequenceFlow>
     <userTask id="water" name="Watering" activiti:assignee="Sam"/>
     <sequenceFlow id="flow2" sourceRef="seed" targetRef="water"></sequenceFlow>
-    <userTask id="havest" name="Havesting"></userTask>
-    <sequenceFlow id="flow3" sourceRef="water" targetRef="havest"></sequenceFlow>
+    <userTask id="harvest" name="Harvest"></userTask>
+    <sequenceFlow id="flow3" sourceRef="water" targetRef="harvest"></sequenceFlow>
     <endEvent id="endevent1" name="End"></endEvent>
-    <sequenceFlow id="flow4" sourceRef="havest" targetRef="endevent1"></sequenceFlow>
+    <sequenceFlow id="flow4" sourceRef="harvest" targetRef="endevent1"></sequenceFlow>
   </process>
 </definitions>

@@ -20,7 +20,7 @@ import org.subethamail.wiser.Wiser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
-public class FarmingProcessTest {
+public class RuleFarmingProcessTest {
 	
 	@Autowired
 	RuntimeService runtimeService;	
@@ -47,9 +47,9 @@ public class FarmingProcessTest {
 		Map<String, Object> variables = new HashMap<String, Object>();
 		variables.put("season", Seed.Season.WINTER);
 		variables.put("mulch", true);
-		variables.put("havestMethod", Seed.Tool.LABOUR);
+		variables.put("harvestMethod", Seed.Tool.LABOUR);
 		variables.put("maturityDays", 90);
-		ProcessInstance p = runtimeService.startProcessInstanceByKey("farming", variables);
+		ProcessInstance p = runtimeService.startProcessInstanceByKey("rule_farming", variables);
 		// Winter is not allowed to sow, then you will get alert email
 		assertEquals(1, wiser.getMessages().size());
 	}
@@ -59,9 +59,9 @@ public class FarmingProcessTest {
 		Map<String, Object> variables = new HashMap<String, Object>();
 		variables.put("season", Seed.Season.SPRING);
 		variables.put("mulch", true);
-		variables.put("havestMethod", Seed.Tool.LABOUR);
+		variables.put("harvestMethod", Seed.Tool.LABOUR);
 		variables.put("maturityDays", 90);
-		ProcessInstance p = runtimeService.startProcessInstanceByKey("farming", variables);
+		ProcessInstance p = runtimeService.startProcessInstanceByKey("rule_farming", variables);
 		Task seeding = taskService.createTaskQuery().processInstanceId(p.getId()).singleResult();
 		assertEquals("Seeding", seeding.getName());
 	}

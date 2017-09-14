@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="multi_watering" name="Multi Instance Watering Process" isExecutable="true">
+    
+    <startEvent id="startevent1" name="Start">
+      <extensionElements>
+        <activiti:formProperty id="season" name="Season" type="ENUM" required="true">
+          <activiti:value id="SUMMER" name="Summer"></activiti:value>
+          <activiti:value id="AUTUMN" name="Autumn"></activiti:value>
+          <activiti:value id="WINTER" name="Winter"></activiti:value>
+          <activiti:value id="SPRING" name="Spring"></activiti:value>
+        </activiti:formProperty>
+        <activiti:formProperty id="mulch" name="RequiredMulch" type="boolean" required="true"></activiti:formProperty>
+        <activiti:formProperty id="harvestMethod" name="HarvestMethod" type="ENUM" required="true">
+          <activiti:value id="LABOUR" name="Labour"></activiti:value>
+          <activiti:value id="MACHINE" name="Machine"></activiti:value>
+          <activiti:value id="CATTLE" name="Cattle"></activiti:value>
+        </activiti:formProperty>
+        <activiti:formProperty id="maturityDays" name="DaysInMaturity" type="int"></activiti:formProperty>
+      </extensionElements>
+    </startEvent>
+    
+    <serviceTask id="servicetask1" name="Service Task" activiti:class="com.sung.demo.farming.services.SeedingService"></serviceTask>
+    
+    <userTask id="seed" name="Seeding"></userTask>    
+    <scriptTask id="water" name="Watering ${assignee}" scriptFormat="groovy" activiti:autoStoreVariables="false" activiti:assignee="${assignee}">
+      <multiInstanceLoopCharacteristics isSequential="false" activiti:collection="${seed.team}" activiti:elementVariable="assignee"></multiInstanceLoopCharacteristics>
+      <script>out:println assignee + " : Starting water !!!";</script>	  	  		    
+    </scriptTask>
+    
+    <userTask id="harvest" name="Harvest"></userTask>
+    <endEvent id="endevent1" name="End"></endEvent>
+    
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="servicetask1"></sequenceFlow>
+    <sequenceFlow id="flow2" sourceRef="servicetask1" targetRef="seed"></sequenceFlow>    
+    <sequenceFlow id="flow3" sourceRef="seed" targetRef="water"></sequenceFlow>    
+    <sequenceFlow id="flow4" sourceRef="water" targetRef="harvest"></sequenceFlow>    
+    <sequenceFlow id="flow5" sourceRef="harvest" targetRef="endevent1"></sequenceFlow>
+    
+  </process>
+</definitions>

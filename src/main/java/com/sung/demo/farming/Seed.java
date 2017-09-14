@@ -1,6 +1,8 @@
 package com.sung.demo.farming;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 
 public class Seed implements Serializable{
 	
@@ -19,9 +21,10 @@ public class Seed implements Serializable{
 	
 	private Season seedingSeason;
 	private boolean requiredMulch;
-	private Tool havestingMethod;
+	private Tool harvestingMethod;
 	private int maturityDays;
 	private boolean okayToSeeding;
+	private List<String> team = Arrays.asList(new String[]{"Sam", "Phil", "Sarah"});
 	
 	public Season getSeedingSeason() {
 		return seedingSeason;
@@ -42,11 +45,11 @@ public class Seed implements Serializable{
 	public void setOkayToSeeding(boolean okayToSeeding) {
 		this.okayToSeeding = okayToSeeding;
 	}
-	public Tool getHavestingMethod() {
-		return havestingMethod;
+	public Tool getHarvestingMethod() {
+		return harvestingMethod;
 	}
-	public void setHavestingMethod(Tool havestingMethod) {
-		this.havestingMethod = havestingMethod;
+	public void setHarvestingMethod(Tool harvestingMethod) {
+		this.harvestingMethod = harvestingMethod;
 	}
 	public int getMaturityDays() {
 		return maturityDays;
@@ -54,6 +57,11 @@ public class Seed implements Serializable{
 	public void setMaturityDays(int maturityDays) {
 		this.maturityDays = maturityDays;
 	}
-	
-	
+	public List<String> getTeam() {
+		return team;
+	}
+	public void setTeam(List<String> team) {
+		this.team = team;
+	}
+
 }

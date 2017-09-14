@@ -15,7 +15,7 @@ public class SeedingService implements JavaDelegate {
 		seed.setSeedingSeason((Season)execution.getVariable("season"));
 		seed.setRequiredMulch((boolean)execution.getVariable("mulch"));
 		seed.setMaturityDays((int)execution.getVariable("maturityDays"));
-		seed.setHavestingMethod((Tool)execution.getVariable("havestMethod"));
+		seed.setHarvestingMethod((Tool)execution.getVariable("harvestMethod"));
 		execution.setVariable("seed", seed);
 	}
 }

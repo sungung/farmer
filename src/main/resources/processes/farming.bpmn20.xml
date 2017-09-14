@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
-  <process id="farming" name="Farming Process" isExecutable="true">
+  <process id="rule_farming" name="Farming Process" isExecutable="true">
     <startEvent id="startevent1" name="Start">
       <extensionElements>
         <activiti:formProperty id="season" name="Season" type="ENUM" required="true">
@@ -10,7 +10,7 @@
           <activiti:value id="SPRING" name="Spring"></activiti:value>
         </activiti:formProperty>
         <activiti:formProperty id="mulch" name="RequiredMulch" type="boolean" required="true"></activiti:formProperty>
-        <activiti:formProperty id="havestMethod" name="HavestMethod" type="ENUM" required="true">
+        <activiti:formProperty id="harvestMethod" name="HarvestMethod" type="ENUM" required="true">
           <activiti:value id="LABOUR" name="Labour"></activiti:value>
           <activiti:value id="MACHINE" name="Machine"></activiti:value>
           <activiti:value id="CATTLE" name="Cattle"></activiti:value>
@@ -20,7 +20,7 @@
     </startEvent>
     <userTask id="seed" name="Seeding"></userTask>
     <userTask id="water" name="Watering" activiti:assignee="Sam"></userTask>
-    <userTask id="havest" name="Havest"></userTask>
+    <userTask id="harvest" name="Harvest"></userTask>
     <endEvent id="endevent1" name="End"></endEvent>
     <serviceTask id="servicetask1" name="Service Task" activiti:class="com.sung.demo.farming.services.SeedingService"></serviceTask>
     <sequenceFlow id="flow5" sourceRef="startevent1" targetRef="servicetask1"></sequenceFlow>
@@ -56,9 +56,9 @@
     <sequenceFlow id="flow11" sourceRef="seed" targetRef="exclusivegateway2"></sequenceFlow>
     <sequenceFlow id="flow12" sourceRef="exclusivegateway2" targetRef="usertask1"></sequenceFlow>
     <sequenceFlow id="flow13" sourceRef="exclusivegateway2" targetRef="water"></sequenceFlow>
-    <sequenceFlow id="flow14" sourceRef="water" targetRef="havest"></sequenceFlow>
+    <sequenceFlow id="flow14" sourceRef="water" targetRef="harvest"></sequenceFlow>
     <sequenceFlow id="flow15" sourceRef="usertask1" targetRef="water"></sequenceFlow>
-    <sequenceFlow id="flow16" sourceRef="havest" targetRef="endevent1"></sequenceFlow>
+    <sequenceFlow id="flow16" sourceRef="harvest" targetRef="endevent1"></sequenceFlow>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_farming">
     <bpmndi:BPMNPlane bpmnElement="farming" id="BPMNPlane_farming">
@@ -71,7 +71,7 @@
       <bpmndi:BPMNShape bpmnElement="water" id="BPMNShape_water">
         <omgdc:Bounds height="60.0" width="100.0" x="560.0" y="120.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="havest" id="BPMNShape_havest">
+      <bpmndi:BPMNShape bpmnElement="harvest" id="BPMNShape_harvest">
         <omgdc:Bounds height="60.0" width="100.0" x="740.0" y="120.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">

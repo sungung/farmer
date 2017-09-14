@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="timer_in_multi_instance_watering" name="Escalating Farming Process" isExecutable="true">
+    <startEvent id="startevent1" name="Start">
+      <extensionElements>
+        <activiti:formProperty id="season" name="Season" type="ENUM" required="true">
+          <activiti:value id="SUMMER" name="Summer"></activiti:value>
+          <activiti:value id="AUTUMN" name="Autumn"></activiti:value>
+          <activiti:value id="WINTER" name="Winter"></activiti:value>
+          <activiti:value id="SPRING" name="Spring"></activiti:value>
+        </activiti:formProperty>
+        <activiti:formProperty id="mulch" name="RequiredMulch" type="boolean" required="true"></activiti:formProperty>
+        <activiti:formProperty id="harvestMethod" name="HarvestMethod" type="ENUM" required="true">
+          <activiti:value id="LABOUR" name="Labour"></activiti:value>
+          <activiti:value id="MACHINE" name="Machine"></activiti:value>
+          <activiti:value id="CATTLE" name="Cattle"></activiti:value>
+        </activiti:formProperty>
+        <activiti:formProperty id="maturityDays" name="DaysInMaturity" type="int"></activiti:formProperty>
+      </extensionElements>
+    </startEvent>
+    <userTask id="seed" name="Seeding"></userTask>
+    <userTask id="harvest" name="Harvest"></userTask>
+    <endEvent id="endevent1" name="End"></endEvent>
+    <serviceTask id="servicetask1" name="Service Task" activiti:class="com.sung.demo.farming.services.SeedingService"></serviceTask>
+    <sequenceFlow id="flow5" sourceRef="startevent1" targetRef="servicetask1"></sequenceFlow>
+    <businessRuleTask id="businessruletask1" name="Is Seeding Season" activiti:ruleVariablesInput="${seed}" activiti:rules="SeedingRule"></businessRuleTask>
+    <sequenceFlow id="flow6" sourceRef="servicetask1" targetRef="businessruletask1"></sequenceFlow>
+    <userTask id="usertask1" name="Mulching"></userTask>
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow7" sourceRef="businessruletask1" targetRef="exclusivegateway1"></sequenceFlow>
+    <sequenceFlow id="flow8" sourceRef="exclusivegateway1" targetRef="seed">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${seed.okayToSeeding==true}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="mailtask1" name="Abort Seeding Notification" activiti:type="mail">
+      <extensionElements>
+        <activiti:field name="to">
+          <activiti:string><![CDATA[admin@vict.com.au]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="from">
+          <activiti:string><![CDATA[user@vict.com.au]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="subject">
+          <activiti:string><![CDATA[Abort seeding]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="text">
+          <activiti:string><![CDATA[Hello, your seed cannnot be sown this season.]]></activiti:string>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="flow9" sourceRef="exclusivegateway1" targetRef="mailtask1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${seed.okayToSeeding==false}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow10" sourceRef="mailtask1" targetRef="endevent1"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow11" sourceRef="seed" targetRef="exclusivegateway2"></sequenceFlow>
+    <sequenceFlow id="flow16" sourceRef="harvest" targetRef="endevent1"></sequenceFlow>
+    <subProcess id="subprocess1" name="Sub Process">
+      <userTask id="water" name="Watering by ${assignee}" activiti:assignee="${assignee}">
+      	<multiInstanceLoopCharacteristics isSequential="false" activiti:collection="${seed.team}" activiti:elementVariable="assignee"></multiInstanceLoopCharacteristics>      
+      </userTask>
+      <startEvent id="startevent2" name="Start"></startEvent>
+      <endEvent id="endevent2" name="End"></endEvent>
+      <sequenceFlow id="flow21" sourceRef="startevent2" targetRef="water"></sequenceFlow>
+      <sequenceFlow id="flow22" sourceRef="water" targetRef="endevent2"></sequenceFlow>
+    </subProcess>
+    <sequenceFlow id="flow17" sourceRef="exclusivegateway2" targetRef="subprocess1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${seed.requiredMulch==false}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow18" sourceRef="exclusivegateway2" targetRef="usertask1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${seed.requiredMulch==true}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow20" sourceRef="subprocess1" targetRef="harvest"></sequenceFlow>
+    <boundaryEvent id="boundarytimer1" name="Timer" attachedToRef="subprocess1" cancelActivity="true">
+      <timerEventDefinition>
+        <timeDuration>PT1S</timeDuration>
+      </timerEventDefinition>
+    </boundaryEvent>
+    <scriptTask id="scripttask1" name="Automatic Watering" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>out:println "Starting water !!!"</script>
+    </scriptTask>
+    <sequenceFlow id="flow23" sourceRef="boundarytimer1" targetRef="scripttask1"></sequenceFlow>
+    <sequenceFlow id="flow24" sourceRef="scripttask1" targetRef="harvest"></sequenceFlow>
+    <sequenceFlow id="flow25" sourceRef="usertask1" targetRef="subprocess1"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_escalate_seeding">
+    <bpmndi:BPMNPlane bpmnElement="escalate_seeding" id="BPMNPlane_escalate_seeding">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="115.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="seed" id="BPMNShape_seed">
+        <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="20.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="harvest" id="BPMNShape_harvest">
+        <omgdc:Bounds height="60.0" width="100.0" x="1010.0" y="50.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="1160.0" y="130.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask1" id="BPMNShape_servicetask1">
+        <omgdc:Bounds height="60.0" width="100.0" x="80.0" y="100.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="businessruletask1" id="BPMNShape_businessruletask1">
+        <omgdc:Bounds height="60.0" width="100.0" x="230.0" y="100.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="usertask1" id="BPMNShape_usertask1">
+        <omgdc:Bounds height="60.0" width="100.0" x="690.0" y="220.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="380.0" y="110.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="mailtask1" id="BPMNShape_mailtask1">
+        <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="290.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway2" id="BPMNShape_exclusivegateway2">
+        <omgdc:Bounds height="40.0" width="40.0" x="569.0" y="127.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="subprocess1" id="BPMNShape_subprocess1">
+        <omgdc:Bounds height="154.0" width="261.0" x="690.0" y="11.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="water" id="BPMNShape_water">
+        <omgdc:Bounds height="60.0" width="100.0" x="780.0" y="51.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="startevent2" id="BPMNShape_startevent2">
+        <omgdc:Bounds height="35.0" width="35.0" x="720.0" y="63.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent2" id="BPMNShape_endevent2">
+        <omgdc:Bounds height="35.0" width="35.0" x="900.0" y="63.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="boundarytimer1" id="BPMNShape_boundarytimer1">
+        <omgdc:Bounds height="30.0" width="30.0" x="890.0" y="151.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask1" id="BPMNShape_scripttask1">
+        <omgdc:Bounds height="55.0" width="105.0" x="860.0" y="360.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
+        <omgdi:waypoint x="35.0" y="132.0"></omgdi:waypoint>
+        <omgdi:waypoint x="80.0" y="130.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6">
+        <omgdi:waypoint x="180.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="230.0" y="130.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7">
+        <omgdi:waypoint x="330.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="380.0" y="130.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow8" id="BPMNEdge_flow8">
+        <omgdi:waypoint x="420.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="50.0"></omgdi:waypoint>
+        <omgdi:waypoint x="470.0" y="50.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow9" id="BPMNEdge_flow9">
+        <omgdi:waypoint x="420.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="210.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="319.0"></omgdi:waypoint>
+        <omgdi:waypoint x="470.0" y="320.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow10" id="BPMNEdge_flow10">
+        <omgdi:waypoint x="570.0" y="320.0"></omgdi:waypoint>
+        <omgdi:waypoint x="628.0" y="319.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1177.0" y="325.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1177.0" y="255.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1177.0" y="165.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow11" id="BPMNEdge_flow11">
+        <omgdi:waypoint x="570.0" y="50.0"></omgdi:waypoint>
+        <omgdi:waypoint x="523.0" y="80.0"></omgdi:waypoint>
+        <omgdi:waypoint x="523.0" y="146.0"></omgdi:waypoint>
+        <omgdi:waypoint x="569.0" y="147.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow16" id="BPMNEdge_flow16">
+        <omgdi:waypoint x="1110.0" y="80.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1122.0" y="80.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1122.0" y="145.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1160.0" y="147.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow21" id="BPMNEdge_flow21">
+        <omgdi:waypoint x="755.0" y="80.0"></omgdi:waypoint>
+        <omgdi:waypoint x="780.0" y="81.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow22" id="BPMNEdge_flow22">
+        <omgdi:waypoint x="880.0" y="81.0"></omgdi:waypoint>
+        <omgdi:waypoint x="900.0" y="80.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow17" id="BPMNEdge_flow17">
+        <omgdi:waypoint x="589.0" y="127.0"></omgdi:waypoint>
+        <omgdi:waypoint x="589.0" y="88.0"></omgdi:waypoint>
+        <omgdi:waypoint x="690.0" y="88.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow18" id="BPMNEdge_flow18">
+        <omgdi:waypoint x="589.0" y="167.0"></omgdi:waypoint>
+        <omgdi:waypoint x="589.0" y="250.0"></omgdi:waypoint>
+        <omgdi:waypoint x="690.0" y="250.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow20" id="BPMNEdge_flow20">
+        <omgdi:waypoint x="951.0" y="88.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1010.0" y="80.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow23" id="BPMNEdge_flow23">
+        <omgdi:waypoint x="905.0" y="181.0"></omgdi:waypoint>
+        <omgdi:waypoint x="912.0" y="360.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow24" id="BPMNEdge_flow24">
+        <omgdi:waypoint x="965.0" y="387.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1105.0" y="387.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1060.0" y="110.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow25" id="BPMNEdge_flow25">
+        <omgdi:waypoint x="790.0" y="250.0"></omgdi:waypoint>
+        <omgdi:waypoint x="822.0" y="249.0"></omgdi:waypoint>
+        <omgdi:waypoint x="820.0" y="165.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
