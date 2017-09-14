@@ -10,4 +10,4 @@ Maven 3+, Java 7+
 
 ## Running the tests
 
-There are 
+mvn clean test
