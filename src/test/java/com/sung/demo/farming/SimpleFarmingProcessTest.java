@@ -119,5 +119,16 @@ public class SimpleFarmingProcessTest {
 		assertEquals(0L, taskService.createTaskQuery().taskAssignee("phil").count());
 		
 	}
+	
+	@Test
+	public void cancel_farming(){
+		ProcessInstance p = runtimeService.startProcessInstanceByKey("simpleFarming");
+		Task seeding = taskService.createTaskQuery().processInstanceId(p.getId()).singleResult();
+		taskService.complete(seeding.getId());
+		// delete process instance will cancel process and dispatch PROCESS_CANCELLED event
+		runtimeService.deleteProcessInstance(p.getId(), "Abort!!");
+		Task watering = taskService.createTaskQuery().processInstanceId(p.getId()).singleResult();
+		assertNull(watering);
+	}
 		
 }

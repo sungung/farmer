@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import javax.annotation.PostConstruct;
 
+import org.activiti.engine.delegate.event.ActivitiEventListener;
 import org.activiti.engine.impl.persistence.deploy.Deployer;
 import org.activiti.engine.impl.rules.RulesDeployer;
 import org.activiti.spring.ProcessEngineFactoryBean;
@@ -13,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
+
+import com.sung.demo.farming.services.EventListener;
 
 @SpringBootApplication
 public class FarmingApplication {
@@ -37,9 +40,8 @@ public class FarmingApplication {
 			processEngine.getProcessEngineConfiguration().setCustomPostDeployers(Arrays.asList(new Deployer[]{new RulesDeployer()}));
 		} else {
 			processEngine.getProcessEngineConfiguration().getCustomPostDeployers().add(new RulesDeployer());
-		}		
+		}
+		processEngine.getProcessEngineConfiguration().setEventListeners(Arrays.asList(new ActivitiEventListener[]{new EventListener()}));
 	}
-	
-
 	
 }

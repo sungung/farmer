@@ -56,7 +56,7 @@
     <sequenceFlow id="flow16" sourceRef="harvest" targetRef="endevent1"></sequenceFlow>
     <subProcess id="subprocess1" name="Sub Process">
       <userTask id="water" name="Watering by ${assignee}" activiti:assignee="${assignee}">
-      	<multiInstanceLoopCharacteristics isSequential="false" activiti:collection="${seed.team}" activiti:elementVariable="assignee"></multiInstanceLoopCharacteristics>      
+        <multiInstanceLoopCharacteristics isSequential="false" activiti:collection="${seed.team}" activiti:elementVariable="assignee"></multiInstanceLoopCharacteristics>
       </userTask>
       <startEvent id="startevent2" name="Start"></startEvent>
       <endEvent id="endevent2" name="End"></endEvent>
@@ -82,8 +82,8 @@
     <sequenceFlow id="flow24" sourceRef="scripttask1" targetRef="harvest"></sequenceFlow>
     <sequenceFlow id="flow25" sourceRef="usertask1" targetRef="subprocess1"></sequenceFlow>
   </process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_escalate_seeding">
-    <bpmndi:BPMNPlane bpmnElement="escalate_seeding" id="BPMNPlane_escalate_seeding">
+  <bpmndi:BPMNDiagram id="BPMNDiagram_timer_in_multi_instance_watering">
+    <bpmndi:BPMNPlane bpmnElement="timer_in_multi_instance_watering" id="BPMNPlane_timer_in_multi_instance_watering">
       <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
         <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="115.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
