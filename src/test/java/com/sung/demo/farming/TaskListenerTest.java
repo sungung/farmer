@@ -15,7 +15,6 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
 import org.activiti.engine.runtime.ProcessInstance;
-import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
 import org.junit.After;
 import org.junit.Before;
@@ -64,7 +63,7 @@ public class TaskListenerTest {
 	
         wiser = new Wiser();
         wiser.setPort(2500);
-        wiser.start();		
+        wiser.start();
 		
 	}
 	
@@ -87,15 +86,20 @@ public class TaskListenerTest {
 		
 		WiserMessage message = messages.get(0);
 		MimeMessage mimeMessage = message.getMimeMessage();
-		assertEquals("about to seed", mimeMessage.getHeader("Subject", null));
+		assertEquals("about to Seeding", mimeMessage.getHeader("Subject", null));
 		
 		taskService.complete(seeding.getId());
 		
 		// You must see iteration of string in the console
-		
+		messages = wiser.getMessages();
+		assertEquals(2, messages.size());
+
 		Task watering = taskService.createTaskQuery().processInstanceId(p.getId()).singleResult();
 		taskService.complete(watering.getId());
-		
+
+		messages = wiser.getMessages();
+		assertEquals(3, messages.size());
+
 		Task havest = taskService.createTaskQuery().processInstanceId(p.getId()).singleResult();
 		taskService.complete(havest.getId());
 		

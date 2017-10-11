@@ -25,18 +25,23 @@
         <activiti:taskListener event="create" delegateExpression="${seedingTaskListener}"></activiti:taskListener>
       </extensionElements>
     </userTask>
-    <userTask id="water" name="Watering"></userTask>
-    <userTask id="harvest" name="Harvest"></userTask>
+    <userTask id="water" name="Watering">
+      <extensionElements>
+        <activiti:taskListener event="create" delegateExpression="${seedingTaskListener}"></activiti:taskListener>
+      </extensionElements>    
+    </userTask>
+    <userTask id="harvest" name="Harvest">
+      <extensionElements>
+        <activiti:taskListener event="create" delegateExpression="${seedingTaskListener}"></activiti:taskListener>
+      </extensionElements>    
+    </userTask>
     <endEvent id="endevent1" name="End"></endEvent>
     <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="servicetask1"></sequenceFlow>
     <sequenceFlow id="flow2" sourceRef="servicetask1" targetRef="seed"></sequenceFlow>
     <sequenceFlow id="flow3" sourceRef="seed" targetRef="water"></sequenceFlow>
     <sequenceFlow id="flow4" sourceRef="water" targetRef="harvest"></sequenceFlow>
     <sequenceFlow id="flow5" sourceRef="harvest" targetRef="endevent1"></sequenceFlow>
-    <boundaryEvent id="boundarysignal1" name="Signal" attachedToRef="seed" cancelActivity="false">
-      <signalEventDefinition signalRef="theSignal"></signalEventDefinition>
-    </boundaryEvent>
-    <serviceTask id="mailtask1" name="Mail Task" activiti:async="true" activiti:type="mail">
+    <serviceTask id="mailtask1" name="Mail Task" activiti:type="mail">
       <extensionElements>
         <activiti:field name="to">
           <activiti:string><![CDATA[user@vict.com.au]]></activiti:string>
@@ -45,15 +50,22 @@
           <activiti:string><![CDATA[admin@vict.com.au]]></activiti:string>
         </activiti:field>
         <activiti:field name="subject">
-          <activiti:string><![CDATA[about to seed]]></activiti:string>
+          <activiti:expression><![CDATA[about to ${currentTask}]]></activiti:expression>
         </activiti:field>
         <activiti:field name="html">
-          <activiti:expression><![CDATA[Seeding will start soon - ${season}]]></activiti:expression>
+          <activiti:expression><![CDATA[${currentTask} will start soon - ${season}]]></activiti:expression>
+        </activiti:field>
+        <!--  let's ignore email exception, it should not stop the whole process -->
+        <activiti:field name="ignoreException">
+          <activiti:expression>true</activiti:expression>
         </activiti:field>
       </extensionElements>
     </serviceTask>
-    <sequenceFlow id="flow6" sourceRef="boundarysignal1" targetRef="mailtask1"></sequenceFlow>
     <sequenceFlow id="flow7" sourceRef="mailtask1" targetRef="endevent1"></sequenceFlow>
+    <startEvent id="signalstartevent1" name="Signal start">
+      <signalEventDefinition signalRef="theSignal"></signalEventDefinition>
+    </startEvent>
+    <sequenceFlow id="flow8" sourceRef="signalstartevent1" targetRef="mailtask1"></sequenceFlow>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_process_task_listener">
     <bpmndi:BPMNPlane bpmnElement="process_task_listener" id="BPMNPlane_process_task_listener">
@@ -66,9 +78,6 @@
       <bpmndi:BPMNShape bpmnElement="seed" id="BPMNShape_seed">
         <omgdc:Bounds height="60.0" width="100.0" x="230.0" y="0.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="boundarysignal1" id="BPMNShape_boundarysignal1">
-        <omgdc:Bounds height="30.0" width="30.0" x="280.0" y="50.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="water" id="BPMNShape_water">
         <omgdc:Bounds height="60.0" width="100.0" x="380.0" y="0.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
@@ -79,7 +88,10 @@
         <omgdc:Bounds height="35.0" width="35.0" x="680.0" y="15.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="mailtask1" id="BPMNShape_mailtask1">
-        <omgdc:Bounds height="55.0" width="105.0" x="242.0" y="120.0"></omgdc:Bounds>
+        <omgdc:Bounds height="55.0" width="105.0" x="300.0" y="131.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="signalstartevent1" id="BPMNShape_signalstartevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="181.0" y="141.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
         <omgdi:waypoint x="35.0" y="32.0"></omgdi:waypoint>
@@ -111,14 +123,14 @@
         <omgdi:waypoint x="642.0" y="30.0"></omgdi:waypoint>
         <omgdi:waypoint x="680.0" y="32.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6">
-        <omgdi:waypoint x="295.0" y="80.0"></omgdi:waypoint>
-        <omgdi:waypoint x="294.0" y="120.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7">
-        <omgdi:waypoint x="347.0" y="147.0"></omgdi:waypoint>
-        <omgdi:waypoint x="697.0" y="147.0"></omgdi:waypoint>
+        <omgdi:waypoint x="405.0" y="158.0"></omgdi:waypoint>
+        <omgdi:waypoint x="697.0" y="158.0"></omgdi:waypoint>
         <omgdi:waypoint x="697.0" y="50.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow8" id="BPMNEdge_flow8">
+        <omgdi:waypoint x="216.0" y="158.0"></omgdi:waypoint>
+        <omgdi:waypoint x="300.0" y="158.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

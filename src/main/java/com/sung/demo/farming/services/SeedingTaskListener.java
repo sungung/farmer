@@ -1,5 +1,8 @@
 package com.sung.demo.farming.services;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.delegate.DelegateTask;
@@ -19,7 +22,10 @@ public class SeedingTaskListener implements TaskListener {
 	@Override
 	public void notify(DelegateTask delegateTask) {
 		// Throwing a signal event
-		runtimeService.signalEventReceived("theSignalName", delegateTask.getVariables());
+		Map<String, Object> variables = new HashMap<String, Object>();
+		variables.putAll(delegateTask.getVariables());
+		variables.put("currentTask", delegateTask.getName());
+		runtimeService.signalEventReceived("theSignalName", variables);
 	}
 
 }
