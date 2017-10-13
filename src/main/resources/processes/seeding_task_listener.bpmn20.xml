@@ -22,25 +22,20 @@
     <serviceTask id="servicetask1" name="Service Task" activiti:class="com.sung.demo.farming.services.SeedingService"></serviceTask>
     <userTask id="seed" name="Seeding" activiti:candidateGroups="ssr">
       <extensionElements>
-        <activiti:taskListener event="create" delegateExpression="${seedingTaskListener}"></activiti:taskListener>
+        <activiti:taskListener event="create" delegateExpression="${farmingTaskListener}"></activiti:taskListener>
       </extensionElements>
     </userTask>
     <userTask id="water" name="Watering">
       <extensionElements>
-        <activiti:taskListener event="create" delegateExpression="${seedingTaskListener}"></activiti:taskListener>
-      </extensionElements>    
+        <activiti:taskListener event="create" delegateExpression="${farmingTaskListener}"></activiti:taskListener>
+      </extensionElements>
     </userTask>
     <userTask id="harvest" name="Harvest">
       <extensionElements>
-        <activiti:taskListener event="create" delegateExpression="${seedingTaskListener}"></activiti:taskListener>
-      </extensionElements>    
+        <activiti:taskListener event="create" delegateExpression="${farmingTaskListener}"></activiti:taskListener>
+      </extensionElements>
     </userTask>
     <endEvent id="endevent1" name="End"></endEvent>
-    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="servicetask1"></sequenceFlow>
-    <sequenceFlow id="flow2" sourceRef="servicetask1" targetRef="seed"></sequenceFlow>
-    <sequenceFlow id="flow3" sourceRef="seed" targetRef="water"></sequenceFlow>
-    <sequenceFlow id="flow4" sourceRef="water" targetRef="harvest"></sequenceFlow>
-    <sequenceFlow id="flow5" sourceRef="harvest" targetRef="endevent1"></sequenceFlow>
     <serviceTask id="mailtask1" name="Mail Task" activiti:type="mail">
       <extensionElements>
         <activiti:field name="to">
@@ -55,82 +50,156 @@
         <activiti:field name="html">
           <activiti:expression><![CDATA[${currentTask} will start soon - ${season}]]></activiti:expression>
         </activiti:field>
-        <!--  let's ignore email exception, it should not stop the whole process -->
         <activiti:field name="ignoreException">
-          <activiti:expression>true</activiti:expression>
+          <activiti:expression><![CDATA[true]]></activiti:expression>
         </activiti:field>
       </extensionElements>
     </serviceTask>
-    <sequenceFlow id="flow7" sourceRef="mailtask1" targetRef="endevent1"></sequenceFlow>
     <startEvent id="signalstartevent1" name="Signal start">
       <signalEventDefinition signalRef="theSignal"></signalEventDefinition>
     </startEvent>
     <sequenceFlow id="flow8" sourceRef="signalstartevent1" targetRef="mailtask1"></sequenceFlow>
+    <parallelGateway id="parallelgateway1" name="Parallel Gateway"></parallelGateway>
+    <sequenceFlow id="flow9" sourceRef="startevent1" targetRef="servicetask1"></sequenceFlow>
+    <serviceTask id="mailtask2" name="Mail Task" activiti:type="mail">
+      <extensionElements>
+        <activiti:field name="to">
+          <activiti:string><![CDATA[admin@vict.com.au]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="from">
+          <activiti:string><![CDATA[seed@vict.com.au]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="subject">
+          <activiti:string><![CDATA[From seeding department to user]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="html">
+          <activiti:string><![CDATA[From seeding department to user]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="ignoreException">
+          <activiti:expression><![CDATA[true]]></activiti:expression>
+        </activiti:field>        
+      </extensionElements>
+    </serviceTask>
+    <serviceTask id="mailtask3" name="Mail Task" activiti:type="mail">
+      <extensionElements>
+        <activiti:field name="to">
+          <activiti:string><![CDATA[admin@vict.com.au]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="from">
+          <activiti:string><![CDATA[seeding@vict.com.au]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="subject">
+          <activiti:string><![CDATA[From seeding department to client]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="html">
+          <activiti:string><![CDATA[From seeding department to client]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="ignoreException">
+          <activiti:expression><![CDATA[true]]></activiti:expression>
+        </activiti:field>        
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="flow10" sourceRef="parallelgateway1" targetRef="seed"></sequenceFlow>
+    <sequenceFlow id="flow11" sourceRef="parallelgateway1" targetRef="mailtask2"></sequenceFlow>
+    <sequenceFlow id="flow12" sourceRef="parallelgateway1" targetRef="mailtask3"></sequenceFlow>
+    <sequenceFlow id="flow13" sourceRef="servicetask1" targetRef="parallelgateway1"></sequenceFlow>
+    <sequenceFlow id="flow15" sourceRef="water" targetRef="harvest"></sequenceFlow>
+    <sequenceFlow id="flow16" sourceRef="harvest" targetRef="endevent1"></sequenceFlow>
+    <parallelGateway id="parallelgateway2" name="Parallel Gateway"></parallelGateway>
+    <sequenceFlow id="flow17" sourceRef="seed" targetRef="parallelgateway2"></sequenceFlow>
+    <sequenceFlow id="flow18" sourceRef="mailtask2" targetRef="parallelgateway2"></sequenceFlow>
+    <sequenceFlow id="flow19" sourceRef="mailtask3" targetRef="parallelgateway2"></sequenceFlow>
+    <sequenceFlow id="flow20" sourceRef="parallelgateway2" targetRef="water"></sequenceFlow>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_process_task_listener">
     <bpmndi:BPMNPlane bpmnElement="process_task_listener" id="BPMNPlane_process_task_listener">
       <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
-        <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="15.0"></omgdc:Bounds>
+        <omgdc:Bounds height="35.0" width="35.0" x="1.0" y="103.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="servicetask1" id="BPMNShape_servicetask1">
-        <omgdc:Bounds height="60.0" width="100.0" x="80.0" y="0.0"></omgdc:Bounds>
+        <omgdc:Bounds height="60.0" width="100.0" x="70.0" y="91.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="seed" id="BPMNShape_seed">
-        <omgdc:Bounds height="60.0" width="100.0" x="230.0" y="0.0"></omgdc:Bounds>
+        <omgdc:Bounds height="60.0" width="100.0" x="295.0" y="0.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="water" id="BPMNShape_water">
-        <omgdc:Bounds height="60.0" width="100.0" x="380.0" y="0.0"></omgdc:Bounds>
+        <omgdc:Bounds height="60.0" width="100.0" x="531.0" y="91.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="harvest" id="BPMNShape_harvest">
-        <omgdc:Bounds height="60.0" width="100.0" x="530.0" y="0.0"></omgdc:Bounds>
+        <omgdc:Bounds height="60.0" width="100.0" x="681.0" y="91.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
-        <omgdc:Bounds height="35.0" width="35.0" x="680.0" y="15.0"></omgdc:Bounds>
+        <omgdc:Bounds height="35.0" width="35.0" x="832.0" y="103.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="mailtask1" id="BPMNShape_mailtask1">
-        <omgdc:Bounds height="55.0" width="105.0" x="300.0" y="131.0"></omgdc:Bounds>
+        <omgdc:Bounds height="55.0" width="105.0" x="710.0" y="269.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="signalstartevent1" id="BPMNShape_signalstartevent1">
-        <omgdc:Bounds height="35.0" width="35.0" x="181.0" y="141.0"></omgdc:Bounds>
+        <omgdc:Bounds height="35.0" width="35.0" x="595.0" y="279.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
-        <omgdi:waypoint x="35.0" y="32.0"></omgdi:waypoint>
-        <omgdi:waypoint x="42.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="42.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="80.0" y="30.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
-        <omgdi:waypoint x="180.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="192.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="192.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="230.0" y="30.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
-        <omgdi:waypoint x="330.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="342.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="342.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="380.0" y="30.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow4" id="BPMNEdge_flow4">
-        <omgdi:waypoint x="480.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="492.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="492.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="530.0" y="30.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
-        <omgdi:waypoint x="630.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="642.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="642.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="680.0" y="32.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7">
-        <omgdi:waypoint x="405.0" y="158.0"></omgdi:waypoint>
-        <omgdi:waypoint x="697.0" y="158.0"></omgdi:waypoint>
-        <omgdi:waypoint x="697.0" y="50.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape bpmnElement="parallelgateway1" id="BPMNShape_parallelgateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="200.0" y="100.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="mailtask2" id="BPMNShape_mailtask2">
+        <omgdc:Bounds height="55.0" width="105.0" x="292.0" y="93.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="mailtask3" id="BPMNShape_mailtask3">
+        <omgdc:Bounds height="55.0" width="105.0" x="292.0" y="190.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="parallelgateway2" id="BPMNShape_parallelgateway2">
+        <omgdc:Bounds height="40.0" width="40.0" x="440.0" y="100.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge bpmnElement="flow8" id="BPMNEdge_flow8">
-        <omgdi:waypoint x="216.0" y="158.0"></omgdi:waypoint>
-        <omgdi:waypoint x="300.0" y="158.0"></omgdi:waypoint>
+        <omgdi:waypoint x="630.0" y="296.0"></omgdi:waypoint>
+        <omgdi:waypoint x="710.0" y="296.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow9" id="BPMNEdge_flow9">
+        <omgdi:waypoint x="36.0" y="120.0"></omgdi:waypoint>
+        <omgdi:waypoint x="70.0" y="121.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow10" id="BPMNEdge_flow10">
+        <omgdi:waypoint x="220.0" y="100.0"></omgdi:waypoint>
+        <omgdi:waypoint x="220.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="295.0" y="30.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow11" id="BPMNEdge_flow11">
+        <omgdi:waypoint x="240.0" y="120.0"></omgdi:waypoint>
+        <omgdi:waypoint x="292.0" y="120.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow12" id="BPMNEdge_flow12">
+        <omgdi:waypoint x="220.0" y="140.0"></omgdi:waypoint>
+        <omgdi:waypoint x="220.0" y="217.0"></omgdi:waypoint>
+        <omgdi:waypoint x="292.0" y="217.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow13" id="BPMNEdge_flow13">
+        <omgdi:waypoint x="170.0" y="121.0"></omgdi:waypoint>
+        <omgdi:waypoint x="200.0" y="120.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow15" id="BPMNEdge_flow15">
+        <omgdi:waypoint x="631.0" y="121.0"></omgdi:waypoint>
+        <omgdi:waypoint x="681.0" y="121.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow16" id="BPMNEdge_flow16">
+        <omgdi:waypoint x="781.0" y="121.0"></omgdi:waypoint>
+        <omgdi:waypoint x="832.0" y="120.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow17" id="BPMNEdge_flow17">
+        <omgdi:waypoint x="395.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="460.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="460.0" y="100.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow18" id="BPMNEdge_flow18">
+        <omgdi:waypoint x="397.0" y="120.0"></omgdi:waypoint>
+        <omgdi:waypoint x="440.0" y="120.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow19" id="BPMNEdge_flow19">
+        <omgdi:waypoint x="397.0" y="217.0"></omgdi:waypoint>
+        <omgdi:waypoint x="460.0" y="217.0"></omgdi:waypoint>
+        <omgdi:waypoint x="460.0" y="140.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow20" id="BPMNEdge_flow20">
+        <omgdi:waypoint x="480.0" y="120.0"></omgdi:waypoint>
+        <omgdi:waypoint x="531.0" y="121.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

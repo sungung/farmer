@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="pojo_var_process" name="Simple Farming Process" isExecutable="true">
+    <startEvent id="startevent1" name="Start"></startEvent>
+    <userTask id="seed" name="Seeding"></userTask>
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="seed"></sequenceFlow>
+    <scriptTask id="water" name="Watering ${assignee}" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <multiInstanceLoopCharacteristics isSequential="false" activiti:collection="${seed.team}" activiti:elementVariable="assignee"></multiInstanceLoopCharacteristics>
+      <script>out:println assignee + " : Starting water !!!";</script>
+    </scriptTask>
+    <userTask id="harvest" name="Harvest"></userTask>
+    <endEvent id="endevent1" name="End"></endEvent>
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
+    <scriptTask id="mulch" name="Mulching" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>out:println "Starting mulch !!!";</script>
+    </scriptTask>
+    <sequenceFlow id="flow2" sourceRef="seed" targetRef="exclusivegateway1"></sequenceFlow>
+    <sequenceFlow id="flow3" sourceRef="exclusivegateway1" targetRef="water">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${seed.requiredMulch == 'false'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow4" sourceRef="exclusivegateway1" targetRef="mulch">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${seed.requiredMulch == 'true'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow5" sourceRef="mulch" targetRef="water"></sequenceFlow>
+    <sequenceFlow id="flow6" sourceRef="water" targetRef="harvest"></sequenceFlow>
+    <sequenceFlow id="flow7" sourceRef="harvest" targetRef="endevent1"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_pojo_var_process">
+    <bpmndi:BPMNPlane bpmnElement="pojo_var_process" id="BPMNPlane_pojo_var_process">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="20.0" y="155.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="seed" id="BPMNShape_seed">
+        <omgdc:Bounds height="60.0" width="100.0" x="100.0" y="140.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="water" id="BPMNShape_water">
+        <omgdc:Bounds height="60.0" width="100.0" x="350.0" y="60.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="harvest" id="BPMNShape_harvest">
+        <omgdc:Bounds height="60.0" width="100.0" x="500.0" y="60.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="650.0" y="75.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="250.0" y="149.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="mulch" id="BPMNShape_mulch">
+        <omgdc:Bounds height="55.0" width="105.0" x="347.0" y="220.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="55.0" y="172.0"></omgdi:waypoint>
+        <omgdi:waypoint x="62.0" y="170.0"></omgdi:waypoint>
+        <omgdi:waypoint x="62.0" y="170.0"></omgdi:waypoint>
+        <omgdi:waypoint x="100.0" y="170.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+        <omgdi:waypoint x="200.0" y="170.0"></omgdi:waypoint>
+        <omgdi:waypoint x="250.0" y="169.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+        <omgdi:waypoint x="270.0" y="149.0"></omgdi:waypoint>
+        <omgdi:waypoint x="270.0" y="90.0"></omgdi:waypoint>
+        <omgdi:waypoint x="350.0" y="90.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow4" id="BPMNEdge_flow4">
+        <omgdi:waypoint x="270.0" y="189.0"></omgdi:waypoint>
+        <omgdi:waypoint x="270.0" y="247.0"></omgdi:waypoint>
+        <omgdi:waypoint x="347.0" y="247.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
+        <omgdi:waypoint x="399.0" y="220.0"></omgdi:waypoint>
+        <omgdi:waypoint x="400.0" y="120.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6">
+        <omgdi:waypoint x="450.0" y="90.0"></omgdi:waypoint>
+        <omgdi:waypoint x="500.0" y="90.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7">
+        <omgdi:waypoint x="600.0" y="90.0"></omgdi:waypoint>
+        <omgdi:waypoint x="650.0" y="92.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

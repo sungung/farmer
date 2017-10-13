@@ -31,6 +31,33 @@ public class SimpleFarmingProcessTest {
 		assertNotNull(processEngine);
 	}
 	
+	@Test
+	public void test_parallel_gateway(){
+		ProcessInstance p = runtimeService.startProcessInstanceByKey("simpleParallelFarming");
+		// complete seeding
+		Task seeding = taskService.createTaskQuery().processInstanceId(p.getId()).singleResult();
+		taskService.complete(seeding.getId());
+
+		// now task shall be watering
+		Task watering = taskService.createTaskQuery().processInstanceId(p.getId()).singleResult();
+		assertEquals("Watering", watering.getName());
+		
+		// complete watering
+		taskService.complete(watering.getId());
+		
+		// current task is harvesting
+		Task harvesting = taskService.createTaskQuery().processInstanceId(p.getId()).singleResult();
+		assertEquals("Harvest", harvesting.getName());		
+		// and we shall have one pending task to finish farming
+		assertEquals(1L, taskService.createTaskQuery().processInstanceId(p.getId()).count());
+		
+		// complete last task
+		taskService.complete(harvesting.getId());		
+		// then there will be no more task left.
+		assertEquals(0L, taskService.createTaskQuery().processInstanceId(p.getId()).count());
+		
+	}
+	
 	/**
 	 * Testing simple farming process which is
 	 * seeding -> watering -> harvest
